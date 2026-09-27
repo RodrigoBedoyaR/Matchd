@@ -80,6 +80,11 @@ export type ExperienceLevel = z.infer<typeof ExperienceLevelSchema>;
 export const RoleSchema = z.enum(["WORKER", "BUSINESS"]);
 export type Role = z.infer<typeof RoleSchema>;
 
+// Seeded demo accounts. Shared so prisma/seed.ts can import them without
+// pulling in API source, which the production image doesn't ship.
+export const DEMO_WORKER_EMAIL = "demo-worker@matchd.app";
+export const DEMO_BUSINESS_EMAIL = "demo-business@matchd.app";
+
 /* --------------------------------- auth ---------------------------------- */
 
 export const RegisterSchema = z.object({

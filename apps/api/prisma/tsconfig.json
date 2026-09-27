@@ -1,0 +1,10 @@
+{
+  // Type-checking only: seed.ts runs through tsx and isn't part of the API build.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["."]
+}

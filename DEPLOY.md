@@ -55,6 +55,7 @@ Before you start, make sure this repository is pushed to your GitHub account. Yo
 
 1. Go back to your Railway API service.
 2. Update the `CORS_ORIGIN` variable to your Vercel URL (the one Vercel shows when the deploy is done, e.g., `https://matchd.vercel.app`). **Important: no trailing slash.**
+   - Also add `APP_URL` with the same Vercel URL. It's used to build password reset links; without it they point to `http://localhost:3200`.
 3. Redeploy the API service (Railway → "Trigger Deploy" or push a commit to GitHub).
    - The API service restarts with the updated CORS setting, allowing requests from your Vercel frontend.
 

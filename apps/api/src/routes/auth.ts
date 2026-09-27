@@ -3,6 +3,8 @@ import { Router, type Response } from "express";
 import {
   ChangeEmailSchema,
   ChangePasswordSchema,
+  DEMO_BUSINESS_EMAIL,
+  DEMO_WORKER_EMAIL,
   DeleteAccountSchema,
   ForgotPasswordSchema,
   LoginSchema,
@@ -15,9 +17,6 @@ import { requireAuth } from "../middleware/auth.js";
 import { serializeBusiness, serializeWorkerSelf } from "../lib/serialize.js";
 
 export const authRouter = Router();
-
-export const DEMO_WORKER_EMAIL = "demo-worker@matchd.app";
-export const DEMO_BUSINESS_EMAIL = "demo-business@matchd.app";
 
 async function loadProfile(userId: string, role: "WORKER" | "BUSINESS") {
   if (role === "WORKER") {

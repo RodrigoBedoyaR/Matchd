@@ -11,6 +11,9 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Compile the shared package from source so the web build doesn't depend
+      // on packages/shared/dist, which is gitignored and not built on Vercel.
+      "@matchd/shared": path.resolve(__dirname, "../../packages/shared/src/index.ts"),
     },
   },
   server: {

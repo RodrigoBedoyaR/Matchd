@@ -3,7 +3,7 @@
 // everything is upserted by a stable seed id.
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { DEMO_BUSINESS_EMAIL, DEMO_WORKER_EMAIL } from "../src/routes/auth.js";
+import { DEMO_BUSINESS_EMAIL, DEMO_WORKER_EMAIL } from "@matchd/shared";
 
 const prisma = new PrismaClient();
 const SEED_PASSWORD_HASH = await bcrypt.hash("password123", 10);

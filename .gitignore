@@ -6,3 +6,4 @@ lovable-poc/
 .env.local
 .env.*.local
 !.env.example
+CLAUDE.md

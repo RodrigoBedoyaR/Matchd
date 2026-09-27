@@ -28,6 +28,10 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Production mode: among other things, stops /auth/forgot-password from
+# returning the reset link in its response.
+ENV NODE_ENV=production
+
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
