@@ -1,0 +1,182 @@
+// Matchd MVP schema. Kept intentionally flat (JSON for availability/experience,
+// native string arrays for tags) — see roadmap: "do not over-engineer the
+// database yet." Everything here can be normalized further once real usage
+// tells us where it matters.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  WORKER
+  BUSINESS
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  worker         WorkerProfile?
+  business       Business?
+  passwordResets PasswordResetToken[]
+}
+
+// One-time password reset links. Only a SHA-256 of the token is stored, so a
+// database leak can't be replayed into account takeovers.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model WorkerProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  age            Int?
+  city           String
+  postalCode     String?
+  lat            Float?
+  lng            Float?
+  maxDistanceKm  Int      @default(10)
+  distanceKm     Float? // approximate distance from the demo city centre, for seed/demo data
+  availability   Json // { mon: ["evening"], sat: ["morning","afternoon"], ... }
+  interests      String[]
+  languages      String[]
+  experience     Json // [{ category, summary }]
+  preferredPay   Float?
+  drivingLicence Boolean  @default(false)
+  bio            String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  applications        Application[]
+  invitations         Invitation[]
+  favoriteJobs        FavoriteJob[]
+  favoritedByBusiness FavoriteCandidate[]
+}
+
+model Business {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  industry    String
+  area        String
+  city        String
+  lat         Float?
+  lng         Float?
+  description String?
+  emoji       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  jobs               Job[]
+  invitations        Invitation[]
+  favoriteCandidates FavoriteCandidate[]
+}
+
+model Job {
+  id                 String   @id @default(cuid())
+  businessId         String
+  business           Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  title              String
+  category           String
+  hourlyPay          Float
+  days               String[]
+  startTime          String
+  endTime            String
+  area               String
+  city               String
+  lat                Float?
+  lng                Float?
+  distanceKm         Float? // approximate distance from the demo city centre, for seed/demo data
+  requiredLanguages  String[]
+  requirements       String[]
+  tasks              String[]
+  offers             String[]
+  description        String
+  recurring          Boolean  @default(true)
+  experienceLevel    String
+  screeningQuestions String[] @default([]) // max 2, asked in the apply flow
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  applications Application[]
+  invitations  Invitation[]
+  favoritedBy  FavoriteJob[]
+
+  @@index([businessId])
+  @@index([active])
+}
+
+model Application {
+  id                    String        @id @default(cuid())
+  workerId              String
+  worker                WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  jobId                 String
+  job                   Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  status                String        @default("Sent")
+  note                  String?
+  answers               Json? // [{ question, answer }] — snapshot of the job's screening questions at apply time
+  confirmedScheduleGaps Boolean       @default(false) // worker said they can cover days the match flagged
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@unique([workerId, jobId])
+  @@index([jobId])
+}
+
+model Invitation {
+  id         String        @id @default(cuid())
+  businessId String
+  business   Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  workerId   String
+  worker     WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  jobId      String
+  job        Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  status     String        @default("Invited")
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@unique([workerId, jobId])
+  @@index([businessId])
+}
+
+model FavoriteJob {
+  id        String        @id @default(cuid())
+  workerId  String
+  worker    WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@unique([workerId, jobId])
+}
+
+model FavoriteCandidate {
+  id         String        @id @default(cuid())
+  businessId String
+  business   Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  workerId   String
+  worker     WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime      @default(now())
+
+  @@unique([businessId, workerId])
+}

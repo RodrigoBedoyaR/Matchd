@@ -1,0 +1,8 @@
+node_modules
+dist
+.DS_Store
+lovable-poc/
+.env
+.env.local
+.env.*.local
+!.env.example
