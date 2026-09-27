@@ -12,6 +12,11 @@ COPY . .
 # Install dependencies at the root (resolves workspace links)
 RUN npm install
 
+# Whether npm nests anything (e.g. the `prisma` CLI) under apps/api/node_modules
+# depends on how the lockfile resolves; make sure the directory exists so the
+# runtime stage's COPY of it can't fail either way.
+RUN mkdir -p apps/api/node_modules
+
 # Generate Prisma client. Run via the workspace's own script rather than a
 # bare `npx prisma` from the repo root — npm workspaces don't hoist the
 # `prisma` CLI binary to the root node_modules/.bin, only to
